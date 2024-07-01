@@ -39,6 +39,9 @@
 #include <map>
 #include <spdlog/spdlog.h>
 #include <type_traits>
+#if FMT_VERSION >= 110000
+#include <fmt/ranges.h>
+#endif
 
 #define log_debug SPDLOG_TRACE
 #define log_dbg SPDLOG_TRACE
@@ -135,7 +138,11 @@ template <typename T>
 struct fmt::formatter<T, std::enable_if_t<std::is_enum_v<T>, char>>
     : formatter<std::underlying_type_t<T>> {
     template <typename FormatContext>
+#if FMT_VERSION >= 110000
+    auto format(const T& value, FormatContext& ctx) const -> decltype(ctx.out()) const
+#else
     auto format(const T& value, FormatContext& ctx) -> decltype(ctx.out())
+#endif
     {
         return fmt::formatter<std::underlying_type_t<T>>::format(
             static_cast<std::underlying_type_t<T>>(value), ctx);

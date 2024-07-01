@@ -26,6 +26,9 @@
 #define __SQL_FORMAT_H__
 
 #include <fmt/format.h>
+#if FMT_VERSION >= 110000
+#include <fmt/ranges.h>
+#endif
 
 struct SQLIdentifier {
     SQLIdentifier(std::string name, char quote_begin, char quote_end)
@@ -42,7 +45,11 @@ struct SQLIdentifier {
 template <>
 struct fmt::formatter<SQLIdentifier> : formatter<std::string> {
     template <typename FormatContext>
+#if FMT_VERSION >= 110000
+    auto format(const SQLIdentifier& tn, FormatContext& ctx) const -> decltype(ctx.out()) const
+#else
     auto format(const SQLIdentifier& tn, FormatContext& ctx) const -> decltype(ctx.out())
+#endif
     {
         return format_to(ctx.out(), "{}{}{}", tn.quote_begin, tn.name, tn.quote_end);
     }
@@ -61,7 +68,11 @@ struct ColumnUpdate {
 template <>
 struct fmt::formatter<ColumnUpdate> : formatter<std::string> {
     template <typename FormatContext>
+#if FMT_VERSION >= 110000
+    auto format(const ColumnUpdate& a, FormatContext& ctx) const -> decltype(ctx.out()) const
+#else
     auto format(const ColumnUpdate& a, FormatContext& ctx) const -> decltype(ctx.out())
+#endif
     {
         return format_to(ctx.out(), "{} = {}", a.column, a.value);
     }
